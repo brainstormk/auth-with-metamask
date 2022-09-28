@@ -21,10 +21,10 @@ app.use("/", route);
 mongoose.connect(
   config.mongoUri,
   {
-    useUnifiedTopology: true,
     useNewUrlParser: true,
-    useFindAndModify: false,
-    useCreateIndex: true,
+    // useFindAndModify: false,
+    // useCreateIndex: true,
+    // useUnifiedTopology: true,
   },
   function (err, cb) {
     if (err) {

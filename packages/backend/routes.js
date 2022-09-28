@@ -4,7 +4,10 @@ const cors = require("cors");
 
 const authController = require("./modules/auth");
 
-const whitelist = ["http://localhost:3000"];
+const whitelist = [
+  "http://localhost:3000",
+  "http://localhost:3002",
+];
 const corsOptions = {
   origin: function (origin, callback) {
     if (whitelist.indexOf(origin?.replace(/\/$/, "")) !== -1) {
@@ -23,6 +26,10 @@ router.all("/api/*", cors(corsOptions));
 
 router.get("/api/user/:address", (req, res, next) => {
   authController.get(req, res, next);
+});
+
+router.post("/api/me/profile", [authController.authenticateToken], (req, res, next) => {
+  authController.myProfile(req, res, next);
 });
 
 router.post("/api/auth/check", [authController.authenticateToken], (req, res, next) => {

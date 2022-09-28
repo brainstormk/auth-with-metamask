@@ -2,50 +2,47 @@ const mongoose = require("mongoose");
 var jwt = require("jsonwebtoken");
 var ethSignUtil = require("eth-sig-util");
 var ethereumjsUtil = require("ethereumjs-util");
-const ethers = require('ethers')
+const ethers = require("ethers");
 
 const config = require("../config");
 const BaseModule = require("./base");
-const User = require("../models/user.model");
+const User = require("../models/user");
 
 module.exports = BaseModule.extend({
   name: "auth.module",
 
   get: async function (req, res) {
     if (!req.params.address) return res.send({ status: false, message: "Address is missing" });
-    if (ethers.utils.isAddress(req.params.address)) return res.send({ status: false, message: "Invalid address" });
+    if (!ethers.utils.isAddress(req.params.address)) return res.send({ status: false, message: "Invalid address" });
 
-    User.findOne(
-      { address: req.params.address },
-      { _id: 0, __v: 0 },
-      async (err, user) => {
-        if (err) return res.send({ status: false, message: err.message });
+    User.findOne({ address: req.params.address }, { _id: 0, __v: 0 }, async (err, user) => {
+      if (err) return res.send({ status: false, message: err.message });
 
-        if (!user) {
-          user = new User({
-            address: req.params.address,
-            nonce: Math.floor(Math.random() * 1000000),
-          });
-          await user.save();
-
-          user = {
-            nonce: user.nonce,
-            address: user.address,
-          };
-        } else {
-          user.nonce = Math.floor(Math.random() * 1000000)
-          await user.save()
-        }
-
-        res.send({
-          status: true,
-          user: {
-            nonce: user.nonce,
-            address: user.address,
-          },
+      if (!user) {
+        user = new User({
+          address: req.params.address,
+          nonce: Math.floor(Math.random() * 1000000),
         });
+        await user.save();
       }
-    ).lean();
+
+      res.send({
+        status: true,
+        user: {
+          nonce: user.nonce,
+          address: user.address,
+        },
+      });
+    }).lean();
+  },
+
+  myProfile: async function(req, res) {
+    return res.send({
+      address: req.user.address,
+      name: req.user.name,
+      email: req.user.email,
+      isRegistered: !!(req.user.name)
+    })
   },
 
   check: async function (req, res) {
@@ -106,7 +103,7 @@ module.exports = BaseModule.extend({
       user.last_login = new Date();
       await user.save();
 
-      var token = jwt.sign({ data: user.address }, config.secret, { expiresIn: "43200m" }); // expireIn 1month
+      var token = jwt.sign({ data: user.address }, config.secret, { expiresIn: "60m" }); // expireIn 1month
       return res.send({ token: token });
     } else {
       return res.status(401).send({ error: "Signature verification failed" });
@@ -136,6 +133,8 @@ module.exports = BaseModule.extend({
       user.email = email;
       user.name = req.body.name;
       await user.save();
+
+      return res.send({status: true})
     });
   },
 });
