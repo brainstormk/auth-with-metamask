@@ -1,0 +1,16 @@
+{
+  "name": "auth-with-metamask",
+  "version": "1.0.0",
+  "description": "Demo project for 'One-click Login with Blockchain: A MetaMask Tutorial'",
+  "license": "MIT",
+  "private": true,
+  "repository": "https://github.com/brainstormk/auth-with-metamask.git",
+  "scripts": {
+    "start:backend": "yarn workspace @auth-with-metamask/backend start",
+    "start:frontend": "yarn workspace @auth-with-metamask/frontend start"
+  },
+  "workspaces": [
+    "packages/backend",
+    "packages/frontend"
+  ]
+}
