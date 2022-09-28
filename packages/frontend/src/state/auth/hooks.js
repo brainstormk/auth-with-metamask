@@ -4,8 +4,7 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 
 import { useAuthState } from "../hooks";
-import { loggedIn, loggedOut, setLoading, setUser } from ".";
-import { fetchProfile } from "./fetchUser";
+import { loggedIn, loggedOut, setLoading } from ".";
 import { useWeb3Context } from "../../context/web3Context";
 
 export const useSignIn = async () => {
