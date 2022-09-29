@@ -50,14 +50,20 @@ module.exports = BaseModule.extend({
   },
 
   update: async function (req, res) {
-    console.log("update reaches");
+    if (!req.body.email || !req.body.name) {
+      return res.status(400).send("Please fill information");
+    }
     if (!req.body.address) return res.send({ status: false, message: "No address" });
 
     const email = req.body.email;
+    if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,8})+$/.test(email) && email != "") {
+      return res.send({ status: false, message: "Invalid email" });
+    }
 
     User.findOne({ address: req.body.address.toLowerCase() }, async (err, user) => {
       if (err) return res.send({ status: false, message: err.message });
       if (!user) return res.send({ status: false, message: "User not found" });
+
 
       if (email && email != user.email) {
         let otherUser = await User.findOne({ email: email, address: { $ne: req.body.address.toLowerCase() } });

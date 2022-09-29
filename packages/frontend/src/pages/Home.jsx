@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import axios from "axios";
 import { useWeb3Context } from "../context/web3Context";
@@ -9,15 +9,10 @@ import { fetchProfile } from "../state/auth/fetchUser";
 const Home = () => {
   const dispatch = useDispatch();
   const { address, connect, disconnect } = useWeb3Context();
-  const { user } = useAuthState();
+  const { user, token } = useAuthState();
 
-  const [name, setName] = useState();
-  const [email, setEmail] = useState();
-
-  useEffect(() => {
-    setName(user?.name ?? "");
-    setEmail(user?.email ?? "");
-  }, [user?.name, user?.email]);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
 
   const handleDisconnect = async () => {
     disconnect();
@@ -31,12 +26,12 @@ const Home = () => {
       return;
     }
 
-    const res = await axios.post("/api/user/register", { address, name, email });
+    const res = await axios.post("/api/user/update", { address, name, email });
     if (res.data.status) {
       const data = await fetchProfile(address);
       dispatch(setUser(data));
     } else {
-      alert(res.data.message)
+      alert(res.data.message);
     }
   };
 
@@ -47,7 +42,7 @@ const Home = () => {
         {address ? (
           <>
             <div className="border m-3 p-3 mx-auto" style={{ maxWidth: "500px" }}>
-              <div className="mb-2">Address: {address}</div>
+              <div className="mb-2">{address}</div>
 
               {user?.isRegistered === undefined ? (
                 <div className="mt-3">Loading...</div>
@@ -55,37 +50,42 @@ const Home = () => {
                 <>
                   <div className="mb-2">
                     <span>Name:</span>
-                    {user?.name ? (
-                      <span className="ml-3">{user?.name}</span>
-                    ) : (
-                      <input className="ml-3" value={name} onChange={(e) => setName(e.target.value)} />
-                    )}
+                    <span className="ml-3">{user?.name}</span>
                   </div>
-                  <div className="d-flex mb-2">
-                    <span className="mr-1">Email: </span>
-                    {user?.email ? (
-                      <span className="ml-3">{user?.email}</span>
-                    ) : (
-                      <input className="ml-3" value={email} onChange={(e) => setEmail(e.target.value)} />
-                    )}
+                  <div className="mb-2">
+                    <span>Email: </span>
+                    <span className="ml-3">{user?.email}</span>
                   </div>
                 </>
               )}
 
-              {user?.isRegistered !== undefined && !user.isRegistered && (
-                <button className="btn btn-primary mt-2 ml-5" onClick={handleUpdate}>
-                  Submit
-                </button>
+              {token && (
+                <div className="mt-5 text-center">
+                  <div className="mb-2">
+                    <input className="ml-3" value={name} placeHolder="Name" onChange={(e) => setName(e.target.value)} />
+                  </div>
+                  <div className="mb-2">
+                    <input
+                      className="ml-3"
+                      value={email}
+                      placeHolder="Email"
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </div>
+                  <button className="btn btn-primary mt-2 ml-5" onClick={handleUpdate}>
+                    {user?.isRegistered ? 'Update' : 'Register'}
+                  </button>
+                </div>
               )}
             </div>
             <div className="text-center mt-5">
               <button className="btn btn-danger" onClick={handleDisconnect}>
-                Logout
+                Disconnect
               </button>
             </div>
           </>
         ) : (
-          <div className="mt-5 text-center">
+          <div className="mt-2 text-center">
             <button className="btn btn-primary" onClick={connect}>
               Connect Wallet
             </button>
